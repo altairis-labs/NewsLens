@@ -9,5 +9,6 @@ scipy>=1.10.0
 nltk>=3.8.1
 sentencepiece>=0.1.99
 torch>=2.0.0
+torchvision>=0.15.0
 transformers>=4.38.0
 huggingface_hub
