@@ -95,10 +95,34 @@ def load_classical():
 
 @st.cache_resource(show_spinner=False)
 def load_transformer():
-    if not os.path.exists(TRANSFORMER_DIR): return None
+    import shutil
+    from huggingface_hub import snapshot_download
+
+    local_path = TRANSFORMER_DIR
+    needs_download = False
+
+    if not os.path.exists(local_path):
+        needs_download = True
+    else:
+        # Check for broken/empty/LFS-pointer files
+        for fname in ["tokenizer.json", "sentencepiece.bpe.model", "model.safetensors"]:
+            fpath = os.path.join(local_path, fname)
+            if not os.path.exists(fpath) or os.path.getsize(fpath) < 1000:
+                needs_download = True
+                break
+
+    if needs_download:
+        if os.path.exists(local_path):
+            shutil.rmtree(local_path)
+        snapshot_download(
+            repo_id="fatima-mustafa-h/newslens-xlm-roberta",
+            local_dir=local_path,
+            local_dir_use_symlinks=False
+        )
+
     try:
         from model import TransformerPredictor
-        return TransformerPredictor(TRANSFORMER_DIR)
+        return TransformerPredictor(local_path)
     except Exception as e:
         st.warning(f"Transformer load failed: {e}")
         return None
