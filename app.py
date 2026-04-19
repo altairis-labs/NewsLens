@@ -95,10 +95,31 @@ def load_classical():
 
 @st.cache_resource(show_spinner=False)
 def load_transformer():
-    if not os.path.exists(TRANSFORMER_DIR): return None
+    import shutil
+    from huggingface_hub import snapshot_download
+
+    local_path = os.path.join(BASE_DIR, "bert_model_best")
+    config_path = os.path.join(local_path, "config.json")
+
+    # Check if it's an LFS pointer or missing
+    is_pointer = False
+    if os.path.exists(config_path):
+        with open(config_path, "r") as f:
+            if "git-lfs" in f.read(200):
+                is_pointer = True
+
+    if not os.path.exists(local_path) or is_pointer:
+        if os.path.exists(local_path):
+            shutil.rmtree(local_path)
+        snapshot_download(
+            repo_id="fatima-mustafa-h/newslens-xlm-roberta",
+            local_dir=local_path,
+            local_dir_use_symlinks=False
+        )
+
     try:
         from model import TransformerPredictor
-        return TransformerPredictor(TRANSFORMER_DIR)
+        return TransformerPredictor(local_path)
     except Exception as e:
         st.warning(f"Transformer load failed: {e}")
         return None
