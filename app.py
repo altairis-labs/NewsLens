@@ -98,17 +98,20 @@ def load_transformer():
     import shutil
     from huggingface_hub import snapshot_download
 
-    local_path = os.path.join(BASE_DIR, "bert_model_best")
-    config_path = os.path.join(local_path, "config.json")
+    local_path = TRANSFORMER_DIR
+    needs_download = False
 
-    # Check if it's an LFS pointer or missing
-    is_pointer = False
-    if os.path.exists(config_path):
-        with open(config_path, "r") as f:
-            if "git-lfs" in f.read(200):
-                is_pointer = True
+    if not os.path.exists(local_path):
+        needs_download = True
+    else:
+        # Check for broken/empty/LFS-pointer files
+        for fname in ["tokenizer.json", "sentencepiece.bpe.model", "model.safetensors"]:
+            fpath = os.path.join(local_path, fname)
+            if not os.path.exists(fpath) or os.path.getsize(fpath) < 1000:
+                needs_download = True
+                break
 
-    if not os.path.exists(local_path) or is_pointer:
+    if needs_download:
         if os.path.exists(local_path):
             shutil.rmtree(local_path)
         snapshot_download(
