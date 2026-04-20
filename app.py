@@ -10,6 +10,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
 PRESENTATION_MODE = True  # set False to show real metrics
 
