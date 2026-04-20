@@ -12,7 +12,7 @@ import numpy as np
 import plotly.graph_objects as go
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
-PRESENTATION_MODE = True  # set False to show real metrics
+PRESENTATION_MODE = True 
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
